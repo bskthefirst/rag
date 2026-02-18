@@ -1,6 +1,9 @@
 name: Scrape and Deploy RAG
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: '0 15 * * *' # Daily at midnight KST
   workflow_dispatch:
