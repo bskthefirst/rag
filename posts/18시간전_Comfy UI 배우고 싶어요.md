@@ -1,0 +1,227 @@
+# Comfy UI 배우고 싶어요
+**Date:** 18시간 전
+**Category:** 다이어리
+**Original URL:** https://blog.naver.com/xpfkwh56/224186993283
+---
+
+1. 국내 영상도 많은데, 쉽게 가는 것은 조피디
+
+더 원리적으로 가는 것은 aipoque 보심 좋구,
+
+둘 외에도 가르치는 사람들 많으니 찾아보심 됨
+
+​
+
+**\* 깊이만 놓고 볼 때, aipoque 외에**
+
+**중/고급자 대상, 무료는 나는 아직 못 봄**
+
+**​**
+
+다만, 오래된 튜토리얼을 볼 때는 주의할 점이
+
+**'99%'** 확률로 그 시절에만 먹히던 얘기라서,
+
+​
+
+느낌만 익히고, 나머지는 본인이 **피차** 해야 됨
+
+​
+
+**\* 이건 생태계 특성상,**
+
+**다 똑같이 적용되는 사항**
+
+​
+
+2. 컴피는 교육 영상을 만들기 어려운데,
+
+사람마다 목적이 다 다르고, 방식이 달라서
+
+​
+
+**\* 똑같은 결과를 만드는 방법이 수천가지**
+
+​
+
+내가 필요로 하는 것을 찾으려면, 불가피하게
+
+​
+
+결국 발품을 찾게 되고 그 시점이 지나가면
+
+내가 직접 내가 필요한 지식을 만들게 될 것임
+
+​
+
+문제는 **'그 시점'** 까지도 버겁다는 경우 임
+
+​
+
+그래서 유료 구독제로, 워크플로우를 쓰거나
+
+여러 가지 다른 대안들로 내몰리게 되는데,
+
+​
+
+<https://www.youtube.com/@pixaroma>
+
+[![](https://dthumb-phinf.pstatic.net/?src=%22https%3A%2F%2Fyt3.googleusercontent.com%2FN5kWtEx3_jRGfL1LUqyhKO5M9REt7twvyiR2CPAoUyoJ-zCo6QESJ3KNjJjgUBvZq_JfsYBFBQ%3Ds900-c-k-c0x00ffffff-no-rj%22&type=ff500_300)](https://www.youtube.com/@pixaroma)
+[**pixaroma**
+
+Designing at the Speed of Innovation. Discover a world of AI-driven design with Pixaroma! Explore the fusion of AI tools like Stable Diffusion, ChatGPT, Flux, and ComfyUI with Adobe Illustrator and Photoshop. Whether you're a beginner or a pro, our tutorials guide you through AI tools, enhancing you...
+
+www.youtube.com](https://www.youtube.com/@pixaroma)
+
+​
+
+풀 한글 더빙 지원 영상이고,
+
+​
+
+**'일부'** 강사들은 저기 있는 내용을
+
+그냥 저 유튜브 **안다는 이유만으로**
+
+싹 재가공해서 파는 경우도 있었음
+
+​
+
+**\* 유튜브에 유명한 컴피 강사들은**
+
+**길어야 1-2년 내로 다 스카웃 당해서**
+
+**​**
+
+**오픈소스 네임드가 클로즈 소스판으로**
+
+**사라지는 것과 동일한 모습이 자주 뜸**
+
+**​**
+
+**근데 가만 생각하면 ,, 당연한 현상임**
+
+**​**
+
+**장원영이 길거리에 그냥 돌아다니는데**
+
+**그걸 엔터계에서 가만히 보고 있을 리가**
+
+​
+
+3. 2D 모델링을 만지면 **결국** 3D 하게 됨
+
+​
+
+3D 는 sam3 을 **안 만질 수가 없고**,
+
+​
+
+<https://github.com/PozzettiAndrea>
+
+[![](https://dthumb-phinf.pstatic.net/?src=%22https%3A%2F%2Favatars.githubusercontent.com%2Fu%2F57418757%3Fv%3D4%3Fs%3D400%22&type=ff120)](https://github.com/PozzettiAndrea)
+[**PozzettiAndrea - Overview**
+
+Software Engineer/Data Scientist Interested in all kinds of 3D data. Join the (unofficial) ComfyUI 3D Discord! :) - PozzettiAndrea
+
+github.com](https://github.com/PozzettiAndrea)
+
+​
+
+그거로 가장 활발한 개발자가 **얘** 임
+
+​
+
+**\* 중국인/인도인이고, 애니프사 달고 있다**
+
+**그럼 다른 것보다 훨씬 집중해서 읽으세요**
+
+**​**
+
+**미친 소리 같은데, 신빙성 있는 이야기 입니다**
+
+**머리 색깔이 휘황찬란하거나, 뭐 눈가리개 등**
+
+**이상한 옵션이 많을수록 실력자일 확률 증가함**
+
+**​**
+
+**애니프사도 다 똑같은 애니 프사가 아님**
+
+**뭐지? 변태 또라이인가? = 고수일 확률 ↑**
+
+**​**
+
+**깃 자기소개가 이력서처럼 되어있다**
+
+**또는 인스타그램 피드 처럼 꾸며져 있다**
+
+**​**
+
+**→ 걍 슬슬 보시고, 뒤로가기 누르세요**
+
+**​**
+
+노드만 다운 받고 바로 접지 마시구,
+
+얘가 이걸 왜 커밋했고, 어쩌다 만들었나
+
+​
+
+꼼꼼하게 보면 고-오수 개발자들은
+
+행동 하나에도 다 **이유**가 있는 편이라,
+
+​
+
+그걸 흔적 삼아서 배우면 좋을 수 있음
+
+​
+
+코드야 AI 한테 맡겨도 그만이고,
+
+하다보면 어차피 다 비슷하게 느는데
+
+​
+
+정말 어려운 것은 **'엔지니어 역량'** 임
+
+이런 에티튜드는 히스토리 뒤져야 나옴
+
+​
+
+쟤가 보는 것을 나도 볼 수 있어야 되는데
+
+​
+
+이게 말이 쉽지,
+
+​
+
+**'안목'** 이 달라져야 되는 일이라
+
+관심 갖고 많이 보는 것 외에 요령이 없음
+
+​
+
+수학 문제, 영어 문제 딱 봤을 때,
+
+​
+
+'좋은 문제다, 학습자에게 이런 것을 묻고,
+
+어떤 것을 확인하고자 하고 있으며,
+
+행간에서 무얼 배우라고 말하고 있다'
+
+​
+
+라는 것이 느껴지는 것은
+
+그냥 문제만 푼다고 되는 것도 아니고
+
+​
+
+그렇다고 문제를 안 풀어서
+
+되는 건 더더욱 아님

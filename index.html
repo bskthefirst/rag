@@ -56,6 +56,8 @@
             color: var(--title);
             text-shadow: 2px 2px 0 #000;
             letter-spacing: 1px;
+            cursor: pointer;
+            user-select: none;
         }
 
         #status {
@@ -128,60 +130,79 @@
         }
 
         #recent-posts {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 20px;
-        }
-
-        .post-icon {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 10px;
+        }
+
+        .post-item {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            gap: 12px;
+            align-items: start;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1.5px solid #000;
+            border-radius: 10px;
+            padding: 10px;
             cursor: pointer;
-            text-align: center;
             transition: transform 0.12s ease;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.18);
         }
 
-        .post-icon:hover {
-            transform: translateY(-2px) scale(1.03);
+        .post-item:hover {
+            transform: translateY(-1px);
         }
 
-        .icon-img {
-            width: 82px;
-            height: 82px;
+        .post-thumb {
+            width: 92px;
+            height: 92px;
             border: 2px solid #000;
-            border-radius: 12px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
+            overflow: hidden;
             box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
-            font-size: 2rem;
-        }
-
-        .icon-v1 {
-            background: linear-gradient(135deg, #ffb6e8 0%, #fff 100%);
-        }
-
-        .icon-v2 {
-            background: linear-gradient(135deg, #d1ff77 0%, #fff 100%);
-        }
-
-        .icon-v3 {
+            font-size: 1.8rem;
             background: linear-gradient(135deg, #95c2ff 0%, #fff 100%);
         }
 
-        .icon-label {
-            max-width: 100%;
+        .post-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .post-info {
+            min-width: 0;
+        }
+
+        .post-title {
+            margin: 0 0 6px;
+            font-size: 1.04rem;
+            line-height: 1.35;
+            font-weight: 700;
+            color: #121212;
+            white-space: normal;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
+        .post-meta {
+            font-size: 0.82rem;
+            color: #5a5a5a;
+            margin-bottom: 5px;
+        }
+
+        .post-preview {
+            font-size: 0.88rem;
+            color: #3a3a3a;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            background: rgba(255, 255, 255, 0.84);
-            border-radius: 4px;
-            padding: 2px 5px;
-            font-family: 'VT323', monospace;
-            font-size: 1.03rem;
-            line-height: 1.1;
         }
 
         #load-more-btn {
@@ -345,14 +366,18 @@
             }
 
             #recent-posts {
-                grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
-                gap: 14px;
+                gap: 9px;
             }
 
-            .icon-img {
-                width: 72px;
-                height: 72px;
-                font-size: 1.7rem;
+            .post-item {
+                grid-template-columns: 78px 1fr;
+                gap: 10px;
+                padding: 9px;
+            }
+
+            .post-thumb {
+                width: 78px;
+                height: 78px;
             }
 
             .modal-content {
@@ -475,6 +500,36 @@
             });
         };
 
+        const getPostPreview = (content) => {
+            if (!content) return 'Open post...';
+            const plain = content
+                .replace(/!\[[^\]]*\]\([^)]+\)/g, ' ')
+                .replace(/\[[^\]]+\]\([^)]+\)/g, ' ')
+                .replace(/^#{1,6}\s+/gm, '')
+                .replace(/[`>*_\-]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            return plain.slice(0, 120) + (plain.length > 120 ? '...' : '');
+        };
+
+        const getPostThumb = (content) => {
+            if (!content) return '';
+            const match = content.match(/!\[[^\]]*\]\(([^)\s]+)\)/);
+            if (!match) return '';
+            const normalized = rewriteImagePaths(match[1].trim().replace(/^['"]|['"]$/g, ''));
+            return normalized;
+        };
+
+        window.goHome = () => {
+            const queryInput = document.getElementById('query');
+            const statusEl = document.getElementById('status');
+            queryInput.value = '';
+            statusEl.innerText = `System Ready. ${posts.length} files loaded.`;
+            window.closeReader();
+            window.renderRecentPosts(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
         window.renderRecentPosts = (reset = false) => {
             const resultsEl = document.getElementById('results');
             const loadMoreBtn = document.getElementById('load-more-btn');
@@ -492,16 +547,22 @@
 
             const nextBatch = posts.slice(displayedCount, displayedCount + PAGE_SIZE);
             const fragment = document.createDocumentFragment();
-            const iconClasses = ['icon-v1', 'icon-v2', 'icon-v3'];
 
-            nextBatch.forEach((post, idx) => {
+            nextBatch.forEach((post) => {
                 const card = document.createElement('div');
-                const iconClass = iconClasses[(displayedCount + idx) % iconClasses.length];
-                card.className = 'post-icon';
+                card.className = 'post-item';
                 card.onclick = () => window.openReader(escape(post.filename));
+                const thumb = getPostThumb(post.content || '');
+                const preview = getPostPreview(post.content || '');
                 card.innerHTML = `
-                    <div class="icon-img ${iconClass}">📝</div>
-                    <div class="icon-label" title="${post.title || ''}">${post.title || 'Untitled'}</div>
+                    <div class="post-thumb">
+                        ${thumb ? `<img src="${thumb}" alt="thumbnail">` : '📝'}
+                    </div>
+                    <div class="post-info">
+                        <h3 class="post-title">${post.title || 'Untitled'}</h3>
+                        <div class="post-meta">${post.date || 'Unknown'} | ${post.category || 'System'}</div>
+                        <div class="post-preview">${preview}</div>
+                    </div>
                 `;
                 fragment.appendChild(card);
             });
@@ -627,6 +688,7 @@
             const queryInput = document.getElementById('query');
             const modal = document.getElementById('reader-modal');
             const closeBtn = document.querySelector('.close-btn');
+            const homeTitle = document.getElementById('home-title');
 
             queryInput.addEventListener('keypress', (event) => {
                 if (event.key === 'Enter') window.search();
@@ -636,6 +698,7 @@
             modal.addEventListener('click', (event) => {
                 if (event.target === modal) window.closeReader();
             });
+            homeTitle.addEventListener('click', window.goHome);
 
             window.loadSystem();
         });
@@ -644,7 +707,7 @@
 
 <body>
     <div class="desktop-shell">
-        <h1>💾 ARCHIVE.LOG</h1>
+        <h1 id="home-title" title="Go Home">💾 ARCHIVE.LOG</h1>
         <div id="status">Initializing...</div>
 
         <div id="search-box">
