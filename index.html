@@ -350,6 +350,7 @@
             box-shadow: 4px 4px 0 #ccc;
             margin: 14px 0;
             height: auto;
+            cursor: zoom-in;
         }
 
         @media (max-width: 720px) {
@@ -497,6 +498,15 @@
                     .replace(/^\/images\//, './images/')
                     .replace(/^images\//, './images/');
                 img.setAttribute('src', clean);
+            });
+
+            // Allow opening original image in a dedicated tab for readability.
+            root.querySelectorAll('img').forEach((img) => {
+                img.setAttribute('title', 'Open original image');
+                img.addEventListener('click', () => {
+                    const src = img.getAttribute('src');
+                    if (src) window.open(src, '_blank', 'noopener,noreferrer');
+                });
             });
         };
 

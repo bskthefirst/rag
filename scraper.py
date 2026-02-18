@@ -12,7 +12,7 @@ import json
 import html
 import argparse
 from datetime import datetime
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 import ssl
 
 try:
@@ -124,6 +124,43 @@ def fetch_post_content_html(log_no):
     response = requests.get(url, headers=headers)
     return response.text
 
+def choose_best_image_url(img):
+    # Naver's `src` is often a tiny `w80_blur` thumbnail.
+    # Prefer lazy/full image candidates first.
+    for key in ['data-lazy-src', 'data-src', 'src']:
+        val = img.get(key)
+        if val and 'blank.gif' not in val:
+            return val
+    return None
+
+def normalize_naver_image_url(url):
+    # Force a high-resolution variant for postfiles CDN.
+    # `type=w2000` returns the highest practical size in most cases.
+    parsed = urlparse(url)
+    if not parsed.scheme:
+        if url.startswith('//'):
+            url = f"https:{url}"
+        else:
+            url = f"https://{url.lstrip('/')}"
+        parsed = urlparse(url)
+
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    query['type'] = ['w2000']
+    new_query = urlencode(query, doseq=True)
+    return urlunparse(parsed._replace(query=new_query))
+
+def should_redownload_image(img_abs_path):
+    if not os.path.exists(img_abs_path):
+        return True
+    try:
+        with Image.open(img_abs_path) as im:
+            w, h = im.size
+        size = os.path.getsize(img_abs_path)
+        # Existing archives were mostly 80px thumbnails.
+        return w <= 120 or h <= 120 or size < 12_000
+    except Exception:
+        return True
+
 def process_images_and_ocr(soup, post_id, perform_ocr=True):
     ocr_texts = []
     
@@ -131,26 +168,32 @@ def process_images_and_ocr(soup, post_id, perform_ocr=True):
     imgs = soup.select('img.se-image-resource, .se-module-image img, #postViewArea img')
     
     for i, img in enumerate(imgs):
-        src = img.get('src')
-        if not src or 'blank.gif' in src:
-            src = img.get('data-lazy-src')
+        src = choose_best_image_url(img)
             
         if src:
             try:
+                src = normalize_naver_image_url(src)
                 # Basic filename
                 ext = 'jpg'
-                if '.png' in src: ext = 'png'
-                elif '.gif' in src: ext = 'gif'
+                path_lower = urlparse(src).path.lower()
+                if path_lower.endswith('.png'):
+                    ext = 'png'
+                elif path_lower.endswith('.gif'):
+                    ext = 'gif'
+                elif path_lower.endswith('.webp'):
+                    ext = 'webp'
                 
                 img_name = f"{post_id}_{i}.{ext}"
                 img_rel_path = os.path.join(IMAGE_DIR, img_name)
                 img_abs_path = os.path.abspath(img_rel_path)
                 
-                # Check if already downloaded
-                if not os.path.exists(img_abs_path):
+                # Download (or replace low-res legacy thumbnail files)
+                if should_redownload_image(img_abs_path):
                     # Download
-                    # print(f"Downloading {src[:30]}...")
-                    content = requests.get(src).content
+                    content = requests.get(src, headers={
+                        'User-Agent': 'Mozilla/5.0',
+                        'Referer': f"{BASE_URL}/{BLOG_ID}"
+                    }, timeout=20).content
                     with open(img_abs_path, 'wb') as f:
                         f.write(content)
                 
@@ -226,6 +269,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--limit', type=int, default=None)
     parser.add_argument('--incremental', action='store_true')
+    parser.add_argument('--no-ocr', action='store_true')
     args = parser.parse_args()
     
     ensure_dirs()
@@ -342,7 +386,7 @@ def main():
             
             # Process Images & OCR
             # Modifies soup in-place
-            process_images_and_ocr(main_container, log_no)
+            process_images_and_ocr(main_container, log_no, perform_ocr=not args.no_ocr)
             
             post_data = {
                 'logNo': log_no,
