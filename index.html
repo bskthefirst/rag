@@ -108,7 +108,7 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.8);
+            background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(5px);
         }
 
@@ -120,7 +120,7 @@
             width: 80%;
             max-width: 900px;
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             position: relative;
             min-height: 80vh;
         }
@@ -145,13 +145,13 @@
             font-size: 1.1em;
             color: #24292e;
         }
-        
+
         .markdown-body img {
             max-width: 100%;
             border-radius: 8px;
             margin: 20px 0;
         }
-        
+
         .markdown-body blockquote {
             border-left: 4px solid #dfe2e5;
             color: #6a737d;
@@ -166,7 +166,7 @@
             gap: 20px;
             margin-top: 30px;
         }
-        
+
         .post-card {
             border: 1px solid #e1e4e8;
             border-radius: 8px;
@@ -175,13 +175,13 @@
             transition: all 0.2s;
             background: white;
         }
-        
+
         .post-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
             border-color: #03c75a;
         }
-        
+
         .section-title {
             margin-top: 40px;
             border-bottom: 2px solid #eee;
@@ -211,13 +211,13 @@
                 ]);
 
                 extractor = model;
-                
+
                 if (idxResp.ok) index = await idxResp.json();
                 if (postsResp.ok) posts = await postsResp.json();
 
                 statusEl.innerText = `Ready! Indexed ${posts.length} full posts (${index.length} chunks).`;
                 document.getElementById('search-btn').disabled = false;
-                
+
                 renderRecentPosts(); // Show browse view by default
 
             } catch (e) {
@@ -225,64 +225,61 @@
                 console.error(e);
             }
         };
-        
+
         window.renderRecentPosts = () => {
-             const container = document.getElementById('results');
-             if(!posts.length) return;
-             
-             let html = `<h2 class="section-title">Latest Posts</h2><div id="recent-posts">`;
-             // Show top 20
-             posts.slice(0, 20).forEach(post => {
-                 html += `
+            const container = document.getElementById('results');
+            if (!posts.length) return;
+
+            let html = `<h2 class="section-title">Latest Posts</h2><div id="recent-posts">`;
+            // Show top 20
+            posts.slice(0, 20).forEach(post => {
+                html += `
                     <div class="post-card" onclick="openReader('${escape(post.filename)}')">
                         <div class="meta">${post.date} | ${post.category}</div>
                         <h3>${post.title}</h3>
                         <p style="color:#666; font-size:0.9em;">Click to read full post...</p>
                     </div>
                  `;
-             });
-             html += `</div>`;
-             container.innerHTML = html;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
         };
 
         window.openReader = (filename) => {
             filename = unescape(filename);
             const post = posts.find(p => p.filename === filename);
-            if(!post) return alert("Post not found!");
-            
+            if (!post) return alert("Post not found!");
+
             const modal = document.getElementById('reader-modal');
             const content = document.getElementById('modal-text');
-            
+
             // Render markdown
             // Remove frontmatter logic is simple: splitting by --- usually works, but content is usually pure MD from scraper?
             // Scraper saves header + content.
             // Let's strip the header (first 6 lines usually) or just render all.
             // Actually, showing header metadata is fine.
-            
+
             // Clean up images: The markdown has mostly local text. Images are relative paths.
             // We need to fix image paths if they are relative?
             // "src=../images/..." -> "src=./images/..." (since index.html is in root)
             // But markdownify might produce relative.
             let md = post.content;
-            
+
             // Fix relative image paths for web
             // If markdown has "![](../images/foo.jpg)", we want "![](images/foo.jpg)"
             md = md.replace(/\(\.\.\/images\//g, '(images/');
-            
+
             content.innerHTML = marked.parse(md);
             modal.style.display = "block";
-            
+
             // Close logic
             document.querySelector('.close-btn').onclick = () => modal.style.display = "none";
             window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; }
         };
 
-        // ... (Cosine & Snippet reused) ...
-        // Redefine search to use posts structure for "Read Saved"
-        
-        // ... (We keep existing search logic, but update the "Read Saved" onclick) ...
-    </script>
-    <!-- ... Rest of existing script (needs careful merge) ... -->
+
+        // --- Core Search Logic ---
+
 
         // Cosine Similarity Function
         function cosineSimilarity(a, b) {
