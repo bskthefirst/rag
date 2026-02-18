@@ -1,0 +1,34 @@
+# Naver Blog Scraper & RAG System
+
+## Phase 1: Scraper (Core)
+- [x] Analyze blog structure
+- [x] Develop scraper implementation
+    - [x] Fetch post list
+    - [x] Extract content & images
+    - [x] OCR integration
+    - [x] Markdown conversion (Filename: `{Date}_{Title}.md`)
+    - [x] **[Enhancement] Extract 'Category' metadata**
+- [x] Implement incremental scraping (Daily Logic)
+- [x] Setup Automation ([run_daily.sh](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/run_daily.sh))
+- [x] Verification (Initial Scrape)
+
+## Phase 2: RAG System (New)
+- [x] **Infrastructure Setup**
+    - [x] Add `sentence-transformers`, `chromadb` (or similar) to requirements.
+    - [x] Setup vector store directory.
+- [x] **Indexing Engine ([rag_indexer.py](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/rag_indexer.py))**
+    - [x] Parse Markdown files (frontmatter + content).
+    - [x] Chunk text (respecting headers).
+    - [x] Generate embeddings (using local model e.g., `all-MiniLM-L6-v2`).
+    - [x] Store in Vector DB with metadata (Date, Category, Title).
+- [x] **Retrieval Interface ([rag_search.py](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/rag_search.py))**
+    - [x] Implement search query function.
+    - [x] Filter by Category/Date.
+    - [x] Return top-k relevant chunks.
+- [x] **Generation (The "G" in RAG)**
+    - [x] Create simple CLI to show retrieved context.
+
+## Phase 3: Verification & Handover
+- [x] Verify RAG search results.
+- [x] Update [walkthrough.md](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/walkthrough.md) with RAG instructions.
+- [x] Final User Review (Beta Test Complete).

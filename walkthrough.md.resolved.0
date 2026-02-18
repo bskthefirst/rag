@@ -1,0 +1,54 @@
+# Naver Blog Scraper Walkthrough
+
+This guide explains how to use the Naver Blog Scraper for [xpfkwh56](https://blog.naver.com/xpfkwh56).
+
+## Features
+- **Scrapes all posts**: Starting from the "View All" list.
+- **OCR Integration**: Extracts Korean text from images using `EasyOCR`.
+- **Incremental Updates**: Tracks the last scraped post to only fetch new content on subsequent runs.
+- **Markdown Output**: Saves posts as `YYYY-MM-DD_Title.md` with downloaded images.
+
+## Prerequisite
+Ensure dependencies are installed:
+```bash
+python3 -m pip install -r requirements.txt
+```
+*(Note: On first run, EasyOCR will download detection models which might take a few minutes)*
+
+## Manual Execution
+
+### Run Full Scrape (or First Run)
+To start scraping:
+```bash
+python3 scraper.py
+```
+
+### Run with Limit
+To test with just the latest 5 posts:
+```bash
+python3 scraper.py --limit 5
+```
+
+## Daily Automation
+
+A shell script [run_daily.sh](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/run_daily.sh) is provided for automation. It runs the scraper in `--incremental` mode.
+
+### 1. Test the script
+```bash
+./run_daily.sh
+```
+
+### 2. Schedule with Cron (Mac/Linux)
+Open your crontab:
+```bash
+crontab -e
+```
+Add the following line to run daily at 9:00 AM (replace `/path/to/...` with your actual path):
+```cron
+0 9 * * * /Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/run_daily.sh >> /tmp/naver_scraper.log 2>&1
+```
+
+## Output Structure
+- `posts/`: Contains Markdown files.
+- [images/](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/scraper.py#95-151): Contains downloaded images.
+- `state.json`: specific file to track the last scraped post ID.

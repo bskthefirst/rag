@@ -1,0 +1,5 @@
+{
+  "artifactType": "ARTIFACT_TYPE_IMPLEMENTATION_PLAN",
+  "summary": "Plan for Naver Blog Scraper with OCR and Automation.\n1. Use `requests` + `BeautifulSoup` for scraping.\n2. Use `EasyOCR` for Korean text extraction from images.\n3. Save posts as Markdown with images downloaded locally.\n4. Implement incremental scraping logic for daily updates.",
+  "updatedAt": "2026-02-18T19:04:43.055978Z"
+}

@@ -1,0 +1,22 @@
+# Naver Blog Scraper & Automation
+
+- [x] Analyze blog structure
+    - [x] Inspect main page and list view
+    - [x] Inspect individual post structure (iframes, selectors)
+- [ ] Develop scraper implementation
+    - [ ] **Check OCR capabilities (Tesseract/EasyOCR)**
+    - [ ] Create script to fetch post list (iterate pages)
+    - [ ] Create script to parse post content (text, images)
+    - [ ] Implement image downloading strategy
+    - [ ] **Implement Korean OCR for extracted images**
+    - [ ] **Implement Markdown conversion (Title = Filename)**
+- [ ] Implement incremental scraping (Daily Logic)
+    - [ ] State management (track last scraped post ID)
+    - [ ] specialized script for new posts only
+- [ ] Setup Automation
+    - [ ] Create execution script
+    - [ ] Configure daily schedule instructions
+- [ ] Verification
+    - [ ] Run full scrape on a subset of posts
+    - [ ] Verify markdown output quality and OCR accuracy
+    - [ ] Verify incremental update logic

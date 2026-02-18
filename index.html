@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naver Blog Archive RAG</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        h1 { text-align: center; color: #333; }
+        #search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        #query { flex-grow: 1; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; background: #03c75a; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #02b350; }
+        #status { text-align: center; color: #666; margin-bottom: 20px; font-style: italic; }
+        .result-card { border: 1px solid #eee; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .result-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .meta { font-size: 0.85em; color: #888; margin-bottom: 5px; }
+        .score { float: right; color: #03c75a; font-weight: bold; }
+        h3 { margin: 0 0 10px 0; font-size: 1.2em; }
+        a { color: #03c75a; text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+    </style>
+    <!-- Load Transformers.js from CDN -->
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0';
+
+        // Disable local model checking (since we use CDN)
+        env.allowLocalModels = false;
+
+        let index = [];
+        let extractor = null;
+
+        async function loadSystem() {
+            const statusEl = document.getElementById('status');
+            statusEl.innerText = "Loading AI Model (all-MiniLM-L6-v2)... This may take a moment.";
+            
+            try {
+                // 1. Load the Embedding Model (runs in browser!)
+                extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+                
+                // 2. Load the Index (your scraped data)
+                statusEl.innerText = "Loading Blog Index...";
+                const response = await fetch('./documents.json');
+                if (!response.ok) throw new Error(`Failed to load index: ${response.statusText}`);
+                index = await response.json();
+                
+                statusEl.innerText = `Ready! Indexed ${index.length} chunks.`;
+                document.getElementById('search-btn').disabled = false;
+            } catch (e) {
+                statusEl.innerText = `Error: ${e.message}`;
+                console.error(e);
+            }
+        }
+
+        // Cosine Similarity Function
+        function cosineSimilarity(a, b) {
+            let dot = 0;
+            let magA = 0;
+            let magB = 0;
+            for (let i = 0; i < a.length; i++) {
+                dot += a[i] * b[i];
+                magA += a[i] * a[i];
+                magB += b[i] * b[i];
+            }
+            return dot / (Math.sqrt(magA) * Math.sqrt(magB));
+        }
+
+        window.search = async () => {
+            const query = document.getElementById('query').value;
+            if (!query) return;
+
+            const statusEl = document.getElementById('status');
+            const resultsEl = document.getElementById('results');
+            
+            statusEl.innerText = "Thinking...";
+            resultsEl.innerHTML = ""; // Clear
+            
+            try {
+                // Generate embedding for query
+                const output = await extractor(query, { pooling: 'mean', normalize: true });
+                const queryVector = output.data;
+
+                // Brute-force search
+                const results = index.map(doc => ({
+                    doc,
+                    score: cosineSimilarity(queryVector, doc.embedding)
+                }))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 10); // Top 10
+
+                // Render
+                const html = results.map(r => `
+                    <div class="result-card">
+                        <span class="score">Score: ${r.score.toFixed(3)}</span>
+                        <div class="meta">
+                            ${r.doc.metadata.category || 'Uncategorized'} | ${r.doc.metadata.date || 'Unknown Date'}
+                        </div>
+                        <h3>${r.doc.metadata.title}</h3>
+                        <p>${r.doc.page_content.substring(0, 300)}...</p>
+                        <a href="https://blog.naver.com/${r.doc.metadata.blog_id || 'xpfkwh56'}/${r.doc.metadata.log_no || ''}" target="_blank">Read Original Post →</a>
+                    </div>
+                `).join('');
+                
+                resultsEl.innerHTML = html;
+                statusEl.innerText = `Found ${results.length} results for "${query}"`;
+            } catch (e) {
+                statusEl.innerText = `Search Error: ${e.message}`;
+                console.error(e);
+            }
+        };
+
+        // Allow Enter key to search
+        document.getElementById('query').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                window.search();
+            }
+        });
+
+        loadSystem();
+    </script>
+</head>
+<body>
+    <h1>📚 Naver Blog Archive RAG</h1>
+    <div id="status">Initializing...</div>
+    <div id="search-box">
+        <input type="text" id="query" placeholder="Ask a question (e.g., '인공지능', '돈', '사업')...">
+        <button id="search-btn" onclick="search()" disabled>Search</button>
+    </div>
+    <div id="results"></div>
+</body>
+</html>

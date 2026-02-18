@@ -1,0 +1,11 @@
+requests
+beautifulsoup4
+markdownify
+easyocr
+Pillow
+fake-useragent
+# RAG Dependencies
+chromadb
+sentence-transformers
+langchain
+langchain-community
