@@ -61,7 +61,56 @@ def main():
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(export_data, f, ensure_ascii=False)
         
-    print("Done!")
+    # --- NEW: Export Full Posts for Reader View ---
+    print("Exporting full posts to posts.json...")
+    import os
+    import glob
+    posts_dir = "posts"
+    all_posts = []
+    
+    if os.path.exists(posts_dir):
+        files = glob.glob(os.path.join(posts_dir, "*.md"))
+        for file_path in files:
+            filename = os.path.basename(file_path)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Simple metadata extraction
+            title = ""
+            date = ""
+            category = "Uncategorized"
+            url = ""
+            
+            lines = content.split('\n')
+            for line in lines[:20]:
+                if line.startswith("# "):
+                    title = line[2:].strip()
+                elif line.startswith("**Date:**"):
+                    date = line.replace("**Date:**", "").strip()
+                elif line.startswith("**Category:**"):
+                    category = line.replace("**Category:**", "").strip()
+                elif line.startswith("**Original URL:**"):
+                    url = line.replace("**Original URL:**", "").strip()
+            
+            all_posts.append({
+                "filename": filename,
+                "title": title,
+                "date": date,
+                "category": category,
+                "url": url,
+                "content": content # Full content
+            })
+            
+    # Sort by date (descending)
+    try:
+        all_posts.sort(key=lambda x: x['date'], reverse=True)
+    except:
+        pass # Handle date parsing issues gracefully
+            
+    with open("posts.json", "w", encoding="utf-8") as f:
+        json.dump(all_posts, f, ensure_ascii=False)
+        
+    print(f"Done! Exported {count} chunks to documents.json and {len(all_posts)} posts to posts.json.")
 
 if __name__ == "__main__":
     main()
