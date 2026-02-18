@@ -1,209 +1,609 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Naver Blog Archive RAG</title>
+    <title>NewJeans Blog Archive</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        :root {
+            --sky-1: #6baaff;
+            --sky-2: #a6d0ff;
+            --panel: #c0c0c0;
+            --ink: #202020;
+            --title: #ffffff;
+            --pixel-green: #b0ff00;
+            --nj-pink: #ff9de2;
+            --win-blue-1: #000080;
+            --win-blue-2: #1084d0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            max-width: 800px;
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, var(--sky-1) 0%, var(--sky-2) 100%);
+            color: var(--ink);
+            padding: 18px;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
+            background: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.04) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 2px, 3px 100%;
+        }
+
+        .desktop-shell {
+            max-width: 1000px;
             margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
         }
 
         h1 {
+            margin: 0 0 14px;
             text-align: center;
-            color: #333;
-        }
-
-        #search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        #query {
-            flex-grow: 1;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background: #03c75a;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background: #02b350;
+            font-family: 'VT323', monospace;
+            font-size: clamp(2.2rem, 6vw, 3.4rem);
+            color: var(--title);
+            text-shadow: 2px 2px 0 #000;
+            letter-spacing: 1px;
         }
 
         #status {
             text-align: center;
-            color: #666;
-            margin-bottom: 20px;
-            font-style: italic;
+            color: #fff;
+            font-family: 'VT323', monospace;
+            font-size: 1.25rem;
+            text-shadow: 1px 1px 0 #000;
+            margin-bottom: 16px;
+        }
+
+        #search-box {
+            background: var(--panel);
+            border: 2px solid;
+            border-color: #fff #808080 #808080 #fff;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px;
+            padding: 4px;
+            max-width: 760px;
+            margin: 0 auto 22px;
+        }
+
+        #query {
+            width: 100%;
+            min-width: 0;
+            border: 2px solid;
+            border-color: #808080 #fff #fff #808080;
+            background: #fff;
+            font-family: 'VT323', monospace;
+            font-size: 1.35rem;
+            line-height: 1;
+            padding: 10px 12px;
+            outline: none;
+        }
+
+        button {
+            background: var(--panel);
+            border: 2px solid;
+            border-color: #fff #808080 #808080 #fff;
+            color: #000;
+            font-family: 'VT323', monospace;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0 18px;
+            min-height: 44px;
+        }
+
+        button:active {
+            border-color: #808080 #fff #fff #808080;
+        }
+
+        button:disabled {
+            color: #7a7a7a;
+            cursor: not-allowed;
+        }
+
+        #results {
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            margin: 0 0 14px;
+            text-align: center;
+            color: #fff;
+            font-family: 'VT323', monospace;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        #recent-posts {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 20px;
+        }
+
+        .post-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.12s ease;
+        }
+
+        .post-icon:hover {
+            transform: translateY(-2px) scale(1.03);
+        }
+
+        .icon-img {
+            width: 82px;
+            height: 82px;
+            border: 2px solid #000;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
+            font-size: 2rem;
+        }
+
+        .icon-v1 {
+            background: linear-gradient(135deg, #ffb6e8 0%, #fff 100%);
+        }
+
+        .icon-v2 {
+            background: linear-gradient(135deg, #d1ff77 0%, #fff 100%);
+        }
+
+        .icon-v3 {
+            background: linear-gradient(135deg, #95c2ff 0%, #fff 100%);
+        }
+
+        .icon-label {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            background: rgba(255, 255, 255, 0.84);
+            border-radius: 4px;
+            padding: 2px 5px;
+            font-family: 'VT323', monospace;
+            font-size: 1.03rem;
+            line-height: 1.1;
+        }
+
+        #load-more-btn {
+            display: none;
+            margin: 28px auto 6px;
+            background: var(--pixel-green);
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        #load-more-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.2);
         }
 
         .result-card {
-            border: 1px solid #eee;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s;
+            background: #fff;
+            border: 2px solid #000;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            padding: 14px 14px 12px;
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
         }
 
-        .result-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .result-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            margin-bottom: 6px;
         }
 
-        .meta {
-            font-size: 0.85em;
-            color: #888;
-            margin-bottom: 5px;
+        .result-card h3 {
+            margin: 0;
+            font-family: 'VT323', monospace;
+            font-size: 1.65rem;
+            line-height: 1.1;
         }
 
         .score {
-            float: right;
-            color: #03c75a;
-            font-weight: bold;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            background: #fff6cc;
+            border: 1px solid #000;
+            padding: 1px 6px;
+            white-space: nowrap;
         }
 
-        h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.2em;
+        .meta {
+            color: #5a5a5a;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
         }
 
-        a {
-            color: #03c75a;
+        .result-card p {
+            margin: 0;
+        }
+
+        .result-card mark {
+            background: var(--pixel-green);
+            color: #000;
+            padding: 0 2px;
+        }
+
+        .result-links {
+            margin-top: 10px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .result-links a {
+            color: #003e90;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
         }
 
-        a:hover {
+        .result-links a:hover {
             text-decoration: underline;
         }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        /* Existing Styles in Head... */
-        /* Modal Styles */
+
         .modal {
             display: none;
             position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            z-index: 2000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(2px);
         }
 
         .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 40px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 900px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-            min-height: 80vh;
+            background: #ececec;
+            margin: 2.5% auto;
+            width: min(92vw, 860px);
+            height: 90vh;
+            border: 2px solid #000;
+            border-radius: 8px;
+            box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.28);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .window-header {
+            background: linear-gradient(90deg, var(--win-blue-1), var(--win-blue-2));
+            color: #fff;
+            font-family: 'VT323', monospace;
+            font-size: 1.24rem;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
 
         .close-btn {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
+            width: 20px;
+            height: 20px;
+            line-height: 18px;
+            text-align: center;
+            border: 1px solid;
+            border-color: #fff #000 #000 #fff;
+            background: #c0c0c0;
+            color: #000;
+            font-family: sans-serif;
             font-weight: bold;
             cursor: pointer;
-            position: absolute;
-            right: 20px;
-            top: 15px;
+            flex-shrink: 0;
         }
 
-        .close-btn:hover {
-            color: black;
+        .window-body {
+            padding: 20px;
+            overflow-y: auto;
+            background: #fff;
         }
 
         .markdown-body {
-            line-height: 1.8;
-            font-size: 1.1em;
-            color: #24292e;
+            line-height: 1.75;
+            word-break: break-word;
         }
 
         .markdown-body img {
             max-width: 100%;
-            border-radius: 8px;
-            margin: 20px 0;
+            border: 2px solid #000;
+            box-shadow: 4px 4px 0 #ccc;
+            margin: 14px 0;
+            height: auto;
         }
 
-        .markdown-body blockquote {
-            border-left: 4px solid #dfe2e5;
-            color: #6a737d;
-            padding-left: 1em;
-            margin-left: 0;
-        }
+        @media (max-width: 720px) {
+            body {
+                padding: 14px;
+            }
 
-        /* Recent Posts Grid */
-        #recent-posts {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
+            #search-box {
+                grid-template-columns: 1fr;
+            }
 
-        .post-card {
-            border: 1px solid #e1e4e8;
-            border-radius: 8px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: white;
-        }
+            button {
+                min-height: 42px;
+            }
 
-        .post-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            border-color: #03c75a;
-        }
+            #recent-posts {
+                grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+                gap: 14px;
+            }
 
-        .section-title {
-            margin-top: 40px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            color: #555;
+            .icon-img {
+                width: 72px;
+                height: 72px;
+                font-size: 1.7rem;
+            }
+
+            .modal-content {
+                width: 95vw;
+                height: 92vh;
+                margin: 3% auto;
+            }
+
+            .window-body {
+                padding: 14px;
+            }
         }
     </style>
-    <!-- Transformers.js Script -->
     <script type="module">
         import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0';
+
         env.allowLocalModels = false;
 
         let index = [];
-        let posts = []; // Full posts
+        let posts = [];
         let extractor = null;
+        let displayedCount = 0;
+        const PAGE_SIZE = 24;
+
+        const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const getQueryTerms = (query) => {
+            const base = query.trim().toLowerCase();
+            if (!base) return [];
+            const split = base.split(/\s+/).filter(Boolean);
+            return [...new Set([base, ...split])];
+        };
+
+        const countMatches = (text, term) => {
+            if (!text || !term) return 0;
+            const re = new RegExp(escapeRegExp(term), 'gi');
+            const matches = text.match(re);
+            return matches ? matches.length : 0;
+        };
+
+        const keywordScore = (doc, terms) => {
+            if (!terms.length) return 0;
+
+            const title = (doc.metadata?.title || '').toLowerCase();
+            const body = (doc.page_content || '').toLowerCase();
+
+            let matchedTerms = 0;
+            let weightedHits = 0;
+
+            for (const term of terms) {
+                const titleHits = countMatches(title, term);
+                const bodyHits = countMatches(body, term);
+                if (titleHits + bodyHits > 0) matchedTerms += 1;
+                weightedHits += (titleHits * 3) + bodyHits;
+            }
+
+            const coverage = matchedTerms / terms.length;
+            const density = Math.min(weightedHits / 10, 1);
+            return (coverage * 0.7) + (density * 0.3);
+        };
+
+        function cosineSimilarity(a, b) {
+            let dot = 0;
+            let magA = 0;
+            let magB = 0;
+            for (let i = 0; i < a.length; i += 1) {
+                dot += a[i] * b[i];
+                magA += a[i] * a[i];
+                magB += b[i] * b[i];
+            }
+            return dot / (Math.sqrt(magA) * Math.sqrt(magB));
+        }
+
+        const getContextSnippet = (text, query) => {
+            const original = text || '';
+            const lowerText = original.toLowerCase();
+            const terms = getQueryTerms(query);
+
+            let bestIndex = -1;
+            let bestTermLen = 0;
+
+            for (const term of terms) {
+                const idx = lowerText.indexOf(term);
+                if (idx !== -1 && (bestIndex === -1 || idx < bestIndex)) {
+                    bestIndex = idx;
+                    bestTermLen = term.length;
+                }
+            }
+
+            let snippet = '';
+            if (bestIndex !== -1) {
+                const contextWindow = 110;
+                const start = Math.max(0, bestIndex - contextWindow);
+                const end = Math.min(original.length, bestIndex + bestTermLen + contextWindow);
+                snippet = `${start > 0 ? '...' : ''}${original.slice(start, end)}${end < original.length ? '...' : ''}`;
+            } else {
+                snippet = `${original.slice(0, 280)}${original.length > 280 ? '...' : ''}`;
+            }
+
+            const safeTerms = terms.map((term) => escapeRegExp(term)).join('|');
+            if (!safeTerms) return snippet;
+            return snippet.replace(new RegExp(`(${safeTerms})`, 'gi'), '<mark>$1</mark>');
+        };
+
+        const rewriteImagePaths = (markdown) => markdown
+            .replace(/(\.\.\/)+images\//g, './images/')
+            .replace(/(\.\.\\)+images\\/g, './images/')
+            .replace(/(["'(])\/images\//g, '$1./images/')
+            .replace(/(["'(])images\//g, '$1./images/');
+
+        const normalizeRenderedImages = (root) => {
+            root.querySelectorAll('img').forEach((img) => {
+                const src = img.getAttribute('src') || '';
+                if (/^(https?:)?\/\//i.test(src) || /^data:/i.test(src)) return;
+                const clean = src
+                    .replace(/^(\.\.\/)+images\//, './images/')
+                    .replace(/^\/images\//, './images/')
+                    .replace(/^images\//, './images/');
+                img.setAttribute('src', clean);
+            });
+        };
+
+        window.renderRecentPosts = (reset = false) => {
+            const resultsEl = document.getElementById('results');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+
+            if (reset) {
+                resultsEl.innerHTML = `
+                    <h2 class="section-title">Recent Archive</h2>
+                    <div id="recent-posts"></div>
+                `;
+                displayedCount = 0;
+            }
+
+            const grid = document.getElementById('recent-posts');
+            if (!grid) return;
+
+            const nextBatch = posts.slice(displayedCount, displayedCount + PAGE_SIZE);
+            const fragment = document.createDocumentFragment();
+            const iconClasses = ['icon-v1', 'icon-v2', 'icon-v3'];
+
+            nextBatch.forEach((post, idx) => {
+                const card = document.createElement('div');
+                const iconClass = iconClasses[(displayedCount + idx) % iconClasses.length];
+                card.className = 'post-icon';
+                card.onclick = () => window.openReader(escape(post.filename));
+                card.innerHTML = `
+                    <div class="icon-img ${iconClass}">📝</div>
+                    <div class="icon-label" title="${post.title || ''}">${post.title || 'Untitled'}</div>
+                `;
+                fragment.appendChild(card);
+            });
+
+            grid.appendChild(fragment);
+            displayedCount += nextBatch.length;
+
+            loadMoreBtn.style.display = displayedCount < posts.length ? 'block' : 'none';
+            loadMoreBtn.disabled = false;
+        };
+
+        window.openReader = (filename) => {
+            const decoded = unescape(filename);
+            const post = posts.find((p) => p.filename === decoded);
+            if (!post) {
+                alert('Post not found.');
+                return;
+            }
+
+            const modal = document.getElementById('reader-modal');
+            const titleEl = document.getElementById('window-title');
+            const contentEl = document.getElementById('modal-text');
+
+            titleEl.textContent = post.title || post.filename;
+
+            const normalizedMd = rewriteImagePaths(post.content || '');
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = marked.parse(normalizedMd);
+            normalizeRenderedImages(wrapper);
+
+            contentEl.innerHTML = wrapper.innerHTML;
+            modal.style.display = 'block';
+        };
+
+        window.closeReader = () => {
+            document.getElementById('reader-modal').style.display = 'none';
+        };
+
+        window.search = async () => {
+            const query = document.getElementById('query').value.trim();
+            const statusEl = document.getElementById('status');
+            const resultsEl = document.getElementById('results');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+
+            if (!query) {
+                statusEl.innerText = `System Ready. ${posts.length} files loaded.`;
+                window.renderRecentPosts(true);
+                return;
+            }
+
+            loadMoreBtn.style.display = 'none';
+            statusEl.innerText = 'Searching archive...';
+            resultsEl.innerHTML = '';
+
+            try {
+                const output = await extractor(query, { pooling: 'mean', normalize: true });
+                const queryVector = output.data;
+                const terms = getQueryTerms(query);
+                const fullLower = query.toLowerCase();
+
+                const results = index.map((doc) => {
+                    const semantic = cosineSimilarity(queryVector, doc.embedding);
+                    const keyword = keywordScore(doc, terms);
+                    const title = (doc.metadata?.title || '').toLowerCase();
+                    const body = (doc.page_content || '').toLowerCase();
+                    const exactBoost = (title.includes(fullLower) || body.includes(fullLower)) ? 0.12 : 0;
+                    const hybrid = (semantic * 0.68) + (keyword * 0.32) + exactBoost;
+                    return { doc, semantic, keyword, hybrid };
+                })
+                    .sort((a, b) => b.hybrid - a.hybrid)
+                    .slice(0, 20);
+
+                const html = results.map((r) => {
+                    const snippet = getContextSnippet(r.doc.page_content || '', query);
+                    return `
+                        <div class="result-card">
+                            <div class="result-head">
+                                <h3>${r.doc.metadata?.title || 'Untitled'}</h3>
+                                <span class="score">Hybrid ${(r.hybrid * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="meta">${r.doc.metadata?.category || 'System'} | ${r.doc.metadata?.date || 'Unknown'} | Keyword ${(r.keyword * 100).toFixed(0)}%</div>
+                            <p>${snippet}</p>
+                            <div class="result-links">
+                                <a href="${r.doc.metadata?.url || '#'}" target="_blank" rel="noopener noreferrer">Original</a>
+                                <a href="#" onclick="openReader('${escape(r.doc.metadata?.source || '')}'); return false;">Local Copy</a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                resultsEl.innerHTML = html || '<div class="result-card"><p>No matching results.</p></div>';
+                statusEl.innerText = `Found ${results.length} results for "${query}"`;
+            } catch (error) {
+                statusEl.innerText = `Search Error: ${error.message}`;
+            }
+        };
 
         window.loadSystem = async () => {
             const statusEl = document.getElementById('status');
-            statusEl.innerText = "Loading AI Model & Archives...";
+            statusEl.innerText = 'Booting system...';
 
             try {
-                // Parallel load
                 const [model, idxResp, postsResp] = await Promise.all([
                     pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2'),
                     fetch('./documents.json'),
@@ -215,198 +615,56 @@
                 if (idxResp.ok) index = await idxResp.json();
                 if (postsResp.ok) posts = await postsResp.json();
 
-                statusEl.innerText = `Ready! Indexed ${posts.length} full posts (${index.length} chunks).`;
+                statusEl.innerText = `System Ready. ${posts.length} files loaded.`;
                 document.getElementById('search-btn').disabled = false;
-
-                renderRecentPosts(); // Show browse view by default
-
-            } catch (e) {
-                statusEl.innerText = `Error: ${e.message}`;
-                console.error(e);
+                window.renderRecentPosts(true);
+            } catch (error) {
+                statusEl.innerText = `System Error: ${error.message}`;
             }
         };
 
-        window.renderRecentPosts = () => {
-            const container = document.getElementById('results');
-            if (!posts.length) return;
-
-            let html = `<h2 class="section-title">Latest Posts</h2><div id="recent-posts">`;
-            // Show top 20
-            posts.slice(0, 20).forEach(post => {
-                html += `
-                    <div class="post-card" onclick="openReader('${escape(post.filename)}')">
-                        <div class="meta">${post.date} | ${post.category}</div>
-                        <h3>${post.title}</h3>
-                        <p style="color:#666; font-size:0.9em;">Click to read full post...</p>
-                    </div>
-                 `;
-            });
-            html += `</div>`;
-            container.innerHTML = html;
-        };
-
-        window.openReader = (filename) => {
-            filename = unescape(filename);
-            const post = posts.find(p => p.filename === filename);
-            if (!post) return alert("Post not found!");
-
+        document.addEventListener('DOMContentLoaded', () => {
+            const queryInput = document.getElementById('query');
             const modal = document.getElementById('reader-modal');
-            const content = document.getElementById('modal-text');
+            const closeBtn = document.querySelector('.close-btn');
 
-            // Render markdown
-            // Remove frontmatter logic is simple: splitting by --- usually works, but content is usually pure MD from scraper?
-            // Scraper saves header + content.
-            // Let's strip the header (first 6 lines usually) or just render all.
-            // Actually, showing header metadata is fine.
+            queryInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') window.search();
+            });
 
-            // Clean up images: The markdown has mostly local text. Images are relative paths.
-            // We need to fix image paths if they are relative?
-            // "src=../images/..." -> "src=./images/..." (since index.html is in root)
-            // But markdownify might produce relative.
-            let md = post.content;
+            closeBtn.addEventListener('click', window.closeReader);
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) window.closeReader();
+            });
 
-            // Fix relative image paths for web
-            // If markdown has "![](../images/foo.jpg)", we want "![](images/foo.jpg)"
-            md = md.replace(/\(\.\.\/images\//g, '(images/');
-
-            content.innerHTML = marked.parse(md);
-            modal.style.display = "block";
-
-            // Close logic
-            document.querySelector('.close-btn').onclick = () => modal.style.display = "none";
-            window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; }
-        };
-
-
-        // --- Core Search Logic ---
-
-
-        // Cosine Similarity Function
-        function cosineSimilarity(a, b) {
-            let dot = 0;
-            let magA = 0;
-            let magB = 0;
-            for (let i = 0; i < a.length; i++) {
-                dot += a[i] * b[i];
-                magA += a[i] * a[i];
-                magB += b[i] * b[i];
-            }
-            return dot / (Math.sqrt(magA) * Math.sqrt(magB));
-        }
-
-        // Helper to find the best snippet around keywords
-        function getContextSnippet(text, query) {
-            const lowerText = text.toLowerCase();
-            const lowerQuery = query.toLowerCase();
-            const words = lowerQuery.split(/\s+/).filter(w => w.length > 1);
-
-            // Find first occurrence of any keyword
-            let bestIndex = -1;
-            for (const word of words) {
-                const idx = lowerText.indexOf(word);
-                if (idx !== -1) {
-                    bestIndex = idx;
-                    break;
-                }
-            }
-
-            let snippet = "";
-            const contextWindow = 100; // chars around match
-
-            if (bestIndex !== -1) {
-                const start = Math.max(0, bestIndex - contextWindow);
-                const end = Math.min(text.length, bestIndex + contextWindow + lowerQuery.length);
-                snippet = (start > 0 ? "..." : "") + text.substring(start, end) + (end < text.length ? "..." : "");
-            } else {
-                // Fallback to start of text
-                snippet = text.substring(0, 300) + (text.length > 300 ? "..." : "");
-            }
-
-            // Highlight keywords
-            // Escape regex special chars in query
-            const safeQuery = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-            if (safeQuery) {
-                const regex = new RegExp(`(${safeQuery})`, 'gi');
-                snippet = snippet.replace(regex, '<mark style="background-color: #fff3cd; padding: 0 2px;">$1</mark>');
-            }
-
-            return snippet;
-        }
-
-        window.search = async () => {
-            const query = document.getElementById('query').value;
-            if (!query) return;
-
-            const statusEl = document.getElementById('status');
-            const resultsEl = document.getElementById('results');
-
-            statusEl.innerText = "Thinking...";
-            resultsEl.innerHTML = ""; // Clear
-
-            try {
-                // Generate embedding for query
-                const output = await extractor(query, { pooling: 'mean', normalize: true });
-                const queryVector = output.data;
-
-                // Brute-force search
-                const results = index.map(doc => ({
-                    doc,
-                    score: cosineSimilarity(queryVector, doc.embedding)
-                }))
-                    .sort((a, b) => b.score - a.score)
-                    .slice(0, 10); // Top 10
-
-                // Render
-                const html = results.map(r => {
-                    const snippet = getContextSnippet(r.doc.page_content, query);
-                    return `
-                    <div class="result-card">
-                        <span class="score">Score: ${r.score.toFixed(3)}</span>
-                        <div class="meta">
-                            ${r.doc.metadata.category || 'Uncategorized'} | ${r.doc.metadata.date || 'Unknown Date'}
-                        </div>
-                        <h3>${r.doc.metadata.title}</h3>
-                        <p>${snippet}</p>
-                        <div style="margin-top: 10px;">
-                            <a href="${r.doc.metadata.url}" target="_blank" style="margin-right: 15px;">Read Original Post →</a>
-                            <a href="https://github.com/bskthefirst/rag/blob/main/posts/${encodeURIComponent(r.doc.metadata.source)}" target="_blank" style="color: #666;">Read Saved Version (MD)</a>
-                        </div>
-                    </div>
-                `}).join('');
-
-                resultsEl.innerHTML = html;
-                statusEl.innerText = `Found ${results.length} results for "${query}"`;
-            } catch (e) {
-                statusEl.innerText = `Search Error: ${e.message}`;
-                console.error(e);
-            }
-        };
-
-        // Allow Enter key to search
-        document.getElementById('query').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                window.search();
-            }
+            window.loadSystem();
         });
-
-        loadSystem();
     </script>
 </head>
 
 <body>
-    <h1>📚 Naver Blog Archive RAG</h1>
-    <div id="status">Initializing...</div>
-    <div id="search-box">
-        <input type="text" id="query" placeholder="Ask a question (e.g., '인공지능', '돈', '사업')...">
-        <button id="search-btn" onclick="search()" disabled>Search</button>
-    </div>
-    <div id="results"></div>
+    <div class="desktop-shell">
+        <h1>💾 ARCHIVE.LOG</h1>
+        <div id="status">Initializing...</div>
 
-    <!-- Reader Modal -->
+        <div id="search-box">
+            <input id="query" type="text" placeholder="Search archives... (e.g., 로컬, AI, 사업)">
+            <button id="search-btn" onclick="search()" disabled>GO</button>
+        </div>
+
+        <div id="results"></div>
+        <button id="load-more-btn" onclick="renderRecentPosts(false)">↓ LOAD MORE ↓</button>
+    </div>
+
     <div id="reader-modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <div id="modal-text" class="markdown-body"></div>
+            <div class="window-header">
+                <span id="window-title">Document Viewer</span>
+                <span class="close-btn">X</span>
+            </div>
+            <div class="window-body">
+                <div id="modal-text" class="markdown-body"></div>
+            </div>
         </div>
     </div>
 </body>
