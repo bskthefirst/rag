@@ -1,0 +1,20 @@
+# Naver Blog Scraper & Automation
+
+- [ ] Analyze blog structure
+    - [ ] Inspect main page and list view
+    - [ ] Inspect individual post structure (iframes, selectors)
+- [ ] Develop scraper implementation
+    - [ ] Create script to fetch post list
+    - [ ] Create script to parse post content (text, images)
+    - [ ] Implement markdown conversion
+    - [ ] Implement image downloading strategy
+- [ ] Implement incremental scraping (Daily Logic)
+    - [ ] State management (track last scraped post)
+    - [ ] specialized script for new posts only
+- [ ] Setup Automation
+    - [ ] Create execution script
+    - [ ] Configure daily schedule (e.g., cron or run-loop explanation)
+- [ ] Verification
+    - [ ] Run full scrape on a subset of posts
+    - [ ] Verify markdown output quality
+    - [ ] Verify incremental update logic

@@ -1,0 +1,35 @@
+# Naver Blog Scraper & RAG System
+
+## Phase 1: Scraper (Core)
+- [x] Analyze blog structure
+- [x] Develop scraper implementation
+    - [x] Fetch post list
+    - [x] Extract content & images
+    - [x] OCR integration
+    - [x] Markdown conversion (Filename: `{Date}_{Title}.md`)
+    - [x] **[Enhancement] Extract 'Category' metadata**
+- [x] Implement incremental scraping (Daily Logic)
+- [x] Setup Automation (`run_daily.sh`)
+- [x] Verification (Initial Scrape)
+
+## Phase 2: RAG System (New)
+- [x] **Infrastructure Setup**
+    - [x] Add `sentence-transformers`, `chromadb` (or similar) to requirements.
+    - [x] Setup vector store directory.
+- [x] **Indexing Engine (`rag_indexer.py`)**
+    - [x] Parse Markdown files (frontmatter + content).
+    - [x] Chunk text (respecting headers).
+    - [x] Generate embeddings (using local model e.g., `all-MiniLM-L6-v2`).
+    - [x] Store in Vector DB with metadata (Date, Category, Title).
+- [x] **Retrieval Interface (`rag_search.py`)**
+    - [x] Implement search query function.
+    - [x] Filter by Category/Date.
+    - [x] Return top-k relevant chunks.
+- [x] **Generation (The "G" in RAG)**
+    - [x] Create simple CLI to show retrieved context.
+- [x] **Verification**
+    - [x] Verified search for "인공지능", "돈", "사업".
+
+## Phase 3: Deployment (GitHub Pages)
+- [x] Create Guide: `github_pages_rag_guide.md` (Serverless Architecture)
+- [x] Final User Handoff
