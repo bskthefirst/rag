@@ -14,14 +14,15 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - run: |
           pip install -r requirements.txt
-          python scraper.py --limit 20
+          python scraper.py --limit 20 --no-ocr
           python rag_indexer.py
           python export_for_web.py
       - uses: peaceiris/actions-gh-pages@v3

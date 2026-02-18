@@ -43,6 +43,19 @@ def ensure_dirs():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     os.makedirs(IMAGE_DIR, exist_ok=True)
 
+def get_with_retry(url, headers=None, timeout=20, retries=3, backoff=1.5):
+    last_err = None
+    for attempt in range(retries):
+        try:
+            resp = requests.get(url, headers=headers, timeout=timeout)
+            resp.raise_for_status()
+            return resp
+        except requests.RequestException as e:
+            last_err = e
+            if attempt < retries - 1:
+                time.sleep(backoff * (attempt + 1))
+    raise last_err
+
 def get_post_list(page=1):
     """Fetches list of posts from PostList.naver"""
     # Use categoryNo=0 (View All) and from=postList
@@ -52,8 +65,7 @@ def get_post_list(page=1):
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
         'Referer': f"{BASE_URL}/{BLOG_ID}"
     }
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
+    response = get_with_retry(url, headers=headers, timeout=20, retries=3)
     # Debug
     # print(f"DEBUG Page {page} fetched. Len: {len(response.text)}")
     return response.text
@@ -121,7 +133,7 @@ def fetch_post_content_html(log_no):
     headers = {
          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
     }
-    response = requests.get(url, headers=headers)
+    response = get_with_retry(url, headers=headers, timeout=20, retries=3)
     return response.text
 
 def choose_best_image_url(img):
@@ -190,10 +202,10 @@ def process_images_and_ocr(soup, post_id, perform_ocr=True):
                 # Download (or replace low-res legacy thumbnail files)
                 if should_redownload_image(img_abs_path):
                     # Download
-                    content = requests.get(src, headers={
+                    content = get_with_retry(src, headers={
                         'User-Agent': 'Mozilla/5.0',
                         'Referer': f"{BASE_URL}/{BLOG_ID}"
-                    }, timeout=20).content
+                    }, timeout=20, retries=3).content
                     with open(img_abs_path, 'wb') as f:
                         f.write(content)
                 
@@ -291,6 +303,7 @@ def main():
     
     page = 1
     stop_scraping = False
+    consecutive_empty_pages = 0
     
     # 1. Collect all valid links first (up to limit or known post)
     while not stop_scraping:
