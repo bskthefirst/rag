@@ -1,0 +1,51 @@
+# Deployment Successful! ✅
+
+Your codebase (Scraper, RAG System, HTML Frontend) is now live on GitHub at:
+👉 **[bskthefirst/rag](https://github.com/bskthefirst/rag)**
+
+## ⚠️ One Last Step for Automation
+
+Because the token you used didn't have `workflow` permissions, I could not push the daily automation file. You must add this manually on the GitHub website.
+
+### How to Fix:
+
+1.  Go to your repository: [bskthefirst/rag](https://github.com/bskthefirst/rag)
+2.  Click **Add file** > **Create new file**.
+3.  Name it: `.github/workflows/deploy.yml`
+4.  Paste the following content:
+
+```yaml
+name: Scrape and Deploy RAG
+
+on:
+  schedule:
+    - cron: '0 15 * * *' # Daily at midnight KST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: |
+          pip install -r requirements.txt
+          python scraper.py --limit 20
+          python rag_indexer.py
+          python export_for_web.py
+      - uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          keep_files: true
+```
+
+5.  Commit the file.
+6.  Go to **Settings > Pages** and enable GitHub Pages from the `gh-pages` branch (once it appears).
+
+Enjoy your automated AI blog archive! 🎉

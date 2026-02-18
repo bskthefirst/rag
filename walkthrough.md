@@ -91,6 +91,12 @@ We have implemented a **Serverless RAG** system that runs entirely in the browse
 -   **`index.html`**: A simple frontend that loads `documents.json` and runs the embedding model (`all-MiniLM-L6-v2`) in the user's browser to perform semantic search.
 -   **`.github/workflows/deploy.yml`**: Automates the entire process. It scrapes new posts, updates the index, exports it, and deploys the static site to GitHub Pages daily.
 
+### Enhanced Search & Reader View
+We have upgraded the frontend (`index.html`) to include:
+-   **Contextual Snippets**: Search results now highlight the matching keywords in context, rather than just showing the first 300 characters.
+-   **Reader View**: You can now read full posts directly on the site without leaving. Click "Read Saved Version" to open a modal with rendered Markdown.
+-   **Browse Mode**: When not searching, the site displays a list of the latest 20 posts for easy browsing.
+
 ### How to Deploy:
 1.  Push the code to your repository: `git push origin main`.
 2.  Go to **GitHub Settings > Pages** and set source to `gh-pages` branch (once the Action runs).

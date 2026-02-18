@@ -279,12 +279,20 @@ def main():
                 stop_scraping = True
                 break
         
-        if new_links_found == 0 and len(links) > 0:
-            print("  Only duplicate links found (likely end of unique posts). Stopping.")
-            break
+        if new_links_found == 0:
+            print(f"  No new unique links on page {page}. (Duplicates/Notices only)")
+            consecutive_empty_pages += 1
+            if len(links) > 0 and consecutive_empty_pages >= 3:
+                print("  3 consecutive pages with only duplicate links. Likely end of unique posts. Stopping.")
+                break
+            elif len(links) == 0:
+                 # Should have been caught by 'if not links' above, but just in case
+                 break
+        else:
+            consecutive_empty_pages = 0
         
         page += 1
-        if page > 50: # safety limit
+        if page > 1000: # safety limit increased
             break
             
     print(f"Found {len(all_links)} posts to process.")

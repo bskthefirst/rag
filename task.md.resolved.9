@@ -1,0 +1,45 @@
+# Naver Blog Scraper & RAG System
+
+## Phase 1: Scraper (Core)
+- [x] Analyze blog structure
+- [x] Develop scraper implementation
+    - [x] Fetch post list
+    - [x] Extract content & images
+    - [x] OCR integration
+    - [x] Markdown conversion (Filename: `{Date}_{Title}.md`)
+    - [x] **[Enhancement] Extract 'Category' metadata**
+- [x] Implement incremental scraping (Daily Logic)
+- [x] Setup Automation ([run_daily.sh](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/run_daily.sh))
+- [x] Verification (Initial Scrape)
+
+## Phase 2: RAG System (New)
+- [x] **Infrastructure Setup**
+    - [x] Add `sentence-transformers`, `chromadb` (or similar) to requirements.
+    - [x] Setup vector store directory.
+- [x] **Indexing Engine ([rag_indexer.py](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/rag_indexer.py))**
+    - [x] Parse Markdown files (frontmatter + content).
+    - [x] Chunk text (respecting headers).
+    - [x] Generate embeddings (using local model e.g., `all-MiniLM-L6-v2`).
+    - [x] Store in Vector DB with metadata (Date, Category, Title).
+- [x] **Retrieval Interface ([rag_search.py](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/rag_search.py))**
+    - [x] Implement search query function.
+    - [x] Filter by Category/Date.
+    - [x] Return top-k relevant chunks.
+- [x] **Generation (The "G" in RAG)**
+    - [x] Create simple CLI to show retrieved context.
+- [x] **Verification**
+    - [x] Verified search for "인공지능", "돈", "사업".
+
+## Phase 3: Deployment (GitHub Pages)
+- [x] Create Guide: [github_pages_rag_guide.md](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/github_pages_rag_guide.md) (Serverless Architecture)
+- [x] **Implement Static RAG Components**
+    - [x] [export_for_web.py](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/export_for_web.py): Dump index to JSON.
+    - [x] [index.html](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/index.html): Transformers.js frontend.
+    - [x] [.github/workflows/deploy.yml](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/.github/workflows/deploy.yml): Monthly scrape & deploy.
+- [x] **Git Initialization**
+    - [x] `git init`
+    - [x] `git add .`
+    - [x] `git commit`
+    - [x] `git remote add origin`
+- [ ] **Final Push** (Requires User Auth)
+- [x] Final User Handoff
