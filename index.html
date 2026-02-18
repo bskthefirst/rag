@@ -140,6 +140,45 @@
             return dot / (Math.sqrt(magA) * Math.sqrt(magB));
         }
 
+        // Helper to find the best snippet around keywords
+        function getContextSnippet(text, query) {
+            const lowerText = text.toLowerCase();
+            const lowerQuery = query.toLowerCase();
+            const words = lowerQuery.split(/\s+/).filter(w => w.length > 1);
+
+            // Find first occurrence of any keyword
+            let bestIndex = -1;
+            for (const word of words) {
+                const idx = lowerText.indexOf(word);
+                if (idx !== -1) {
+                    bestIndex = idx;
+                    break;
+                }
+            }
+
+            let snippet = "";
+            const contextWindow = 100; // chars around match
+
+            if (bestIndex !== -1) {
+                const start = Math.max(0, bestIndex - contextWindow);
+                const end = Math.min(text.length, bestIndex + contextWindow + lowerQuery.length);
+                snippet = (start > 0 ? "..." : "") + text.substring(start, end) + (end < text.length ? "..." : "");
+            } else {
+                // Fallback to start of text
+                snippet = text.substring(0, 300) + (text.length > 300 ? "..." : "");
+            }
+
+            // Highlight keywords
+            // Escape regex special chars in query
+            const safeQuery = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+            if (safeQuery) {
+                const regex = new RegExp(`(${safeQuery})`, 'gi');
+                snippet = snippet.replace(regex, '<mark style="background-color: #fff3cd; padding: 0 2px;">$1</mark>');
+            }
+
+            return snippet;
+        }
+
         window.search = async () => {
             const query = document.getElementById('query').value;
             if (!query) return;
@@ -164,20 +203,22 @@
                     .slice(0, 10); // Top 10
 
                 // Render
-                const html = results.map(r => `
+                const html = results.map(r => {
+                    const snippet = getContextSnippet(r.doc.page_content, query);
+                    return `
                     <div class="result-card">
                         <span class="score">Score: ${r.score.toFixed(3)}</span>
                         <div class="meta">
                             ${r.doc.metadata.category || 'Uncategorized'} | ${r.doc.metadata.date || 'Unknown Date'}
                         </div>
                         <h3>${r.doc.metadata.title}</h3>
-                        <p>${r.doc.page_content.substring(0, 300)}...</p>
+                        <p>${snippet}</p>
                         <div style="margin-top: 10px;">
                             <a href="${r.doc.metadata.url}" target="_blank" style="margin-right: 15px;">Read Original Post →</a>
                             <a href="https://github.com/bskthefirst/rag/blob/main/posts/${encodeURIComponent(r.doc.metadata.source)}" target="_blank" style="color: #666;">Read Saved Version (MD)</a>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
 
                 resultsEl.innerHTML = html;
                 statusEl.innerText = `Found ${results.length} results for "${query}"`;

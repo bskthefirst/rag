@@ -32,4 +32,16 @@
 
 ## Phase 3: Deployment (GitHub Pages)
 - [x] Create Guide: `github_pages_rag_guide.md` (Serverless Architecture)
+- [x] **Implement Static RAG Components**
+    - [x] `export_for_web.py`: Dump index to JSON.
+    - [x] `index.html`: Transformers.js frontend.
+    - [x] `.github/workflows/deploy.yml`: Monthly scrape & deploy.
+- [x] **Git Initialization**
+    - [x] `git init`
+    - [x] `git add .`
+    - [x] `git commit`
+    - [x] `git remote add origin`
+- [x] **Final Push**
+    - [x] Pushed Code & Data.
+    - [x] **Pushed Automation Workflow** (Confirmed with new token).
 - [x] Final User Handoff

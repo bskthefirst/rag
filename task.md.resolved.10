@@ -42,6 +42,6 @@
     - [x] `git commit`
     - [x] `git remote add origin`
 - [x] **Final Push**
-    - [x] Pushed Code & Data.
-    - [x] **Pushed Automation Workflow** (Confirmed with new token).
+    - [x] Pushed Code & Data (Workflow file excluded due to token scope).
+    - [ ] **User Action**: Manually add [.github/workflows/deploy.yml](file:///Users/suhyun/.gemini/antigravity/brain/558fbe7a-dd4d-4a21-b204-2d47dcf92244/.github/workflows/deploy.yml) on GitHub.
 - [x] Final User Handoff
